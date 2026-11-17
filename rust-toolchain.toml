@@ -1,0 +1,5 @@
+# misma versión que el Dockerfile y que rust-version en Cargo.toml.
+[toolchain]
+channel = "1.88.0"
+components = ["clippy", "rustfmt"]
+profile = "minimal"
