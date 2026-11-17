@@ -1,0 +1,34 @@
+# solo estas entradas de la raíz pertenecen al repositorio publicable.
+/*
+!/.gitignore
+!/.github/
+!/Cargo.toml
+!/Cargo.lock
+!/build.rs
+!/clippy.toml
+!/rust-toolchain.toml
+!/dist-workspace.toml
+!/README.md
+!/src/
+!/assets/
+!/server/
+!/protocol/
+!/.env.example
+!/Dockerfile
+!/compose.yaml
+!/.dockerignore
+
+# archivos locales del sistema, incluso dentro del código y los recursos.
+.DS_Store
+.env
+*.sqlite3
+*.sqlite3-*
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.pem
+*.key
+*.crt
+# excepción: el certificado público de la CA de la VM, que el CI incrusta en el cliente.
+!/assets/ca/anotau-vm.crt
