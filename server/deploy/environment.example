@@ -1,0 +1,10 @@
+# Configuración de anotau-server en la VM. La lee systemd y `anotau-admin`.
+ANOTAU_LISTEN=0.0.0.0:8443
+ANOTAU_DATABASE=/var/lib/anotau/anotau.sqlite3
+ANOTAU_TLS_CERT=/etc/anotau/tls/server.crt
+ANOTAU_TLS_KEY=/etc/anotau/tls/server.key
+ANOTAU_SERVER_NAME=nombre-de-la-vm
+# 1 deja solo /v1/health y libera SQLite para trabajar sobre la base.
+ANOTAU_MAINTENANCE=0
+ANOTAU_BACKUP_DIR=/var/backups/anotau
+ANOTAU_BACKUP_KEEP=7

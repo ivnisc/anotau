@@ -1,0 +1,49 @@
+[Unit]
+Description=Servidor de notas Anotau
+Documentation=https://github.com/ivnisc/anotau
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=anotau
+Group=anotau
+ExecStart=/usr/local/bin/anotau-server
+EnvironmentFile=/etc/anotau/environment
+WorkingDirectory=/var/lib/anotau
+UMask=0077
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+# recursos: el servidor limita conexiones a 256 y la concurrencia de SQLite y Argon2
+LimitNOFILE=512
+TasksMax=32
+MemoryMax=256M
+
+# aislamiento: solo escribe su base y sus respaldos
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+ReadWritePaths=/var/lib/anotau /var/backups/anotau
+
+[Install]
+WantedBy=multi-user.target

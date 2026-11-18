@@ -1,0 +1,29 @@
+#!/bin/sh
+# Consola de administración: ejecuta una tarea de anotau-server como el usuario del servicio,
+# con su configuración. No arranca un segundo servidor: el servicio lo gestiona systemd.
+set -eu
+usage() {
+    cat >&2 <<'EOF'
+Uso: sudo anotau-admin <tarea>
+  tickets                    solicitudes de recuperación pendientes
+  reset-password <usuario>   contraseña temporal (72 h), cierra sus sesiones
+  --backup                   respaldo inmediato en ANOTAU_BACKUP_DIR
+El servicio se gestiona con: sudo systemctl status|restart anotau
+EOF
+}
+case "${1:-}" in
+    tickets | --backup) [ "$#" -eq 1 ] || { usage; exit 2; } ;;
+    reset-password) [ "$#" -eq 2 ] || { usage; exit 2; } ;;
+    -h | --help | help) usage; exit 0 ;;
+    *) usage; exit 2 ;;
+esac
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Ejecuta con sudo: sudo anotau-admin $*" >&2
+    exit 1
+fi
+umask 077
+set -a
+. /etc/anotau/environment
+set +a
+exec setpriv --reuid=anotau --regid=anotau --init-groups --inh-caps=-all \
+    /usr/local/bin/anotau-server "$@"
