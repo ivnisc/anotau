@@ -1,0 +1,49 @@
+services:
+  server:
+    build: .
+    ports:
+      - "${ANOTAU_BIND_IP:-127.0.0.1}:${ANOTAU_PORT:-8443}:8443"
+    environment:
+      ANOTAU_LISTEN: "0.0.0.0:8443"
+      ANOTAU_DATABASE: ${ANOTAU_DATABASE:-/data/anotau.sqlite3}
+      ANOTAU_TLS_CERT: ${ANOTAU_TLS_CERT:-/data/localhost.crt}
+      ANOTAU_TLS_KEY: ${ANOTAU_TLS_KEY:-/data/localhost.key}
+      ANOTAU_SERVER_NAME: ${ANOTAU_SERVER_NAME:-anotau-dev}
+      ANOTAU_MAINTENANCE: ${ANOTAU_MAINTENANCE:-0}
+      ANOTAU_BACKUP_DIR: ${ANOTAU_BACKUP_DIR:-/data/backups}
+      ANOTAU_BACKUP_KEEP: ${ANOTAU_BACKUP_KEEP:-7}
+    volumes:
+      - anotau-data:/data
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        umask 077
+        mkdir -p "$${ANOTAU_BACKUP_DIR}"
+        if [ ! -f "$${ANOTAU_TLS_CERT}" ] || [ ! -f "$${ANOTAU_TLS_KEY}" ]; then
+          openssl req -x509 -newkey rsa:2048 -sha256 -nodes -days 365 \
+            -keyout "$${ANOTAU_TLS_KEY}" -out "$${ANOTAU_TLS_CERT}" \
+            -subj /CN=localhost -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1' \
+            -addext 'basicConstraints=critical,CA:FALSE' -addext 'extendedKeyUsage=serverAuth'
+        fi
+        exec anotau-server
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          printf 'GET /v1/health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'
+          | openssl s_client -quiet -verify_return_error -verify_hostname localhost
+          -CAfile "$${ANOTAU_TLS_CERT}" -connect 127.0.0.1:8443 2>/dev/null
+          | grep -q '^HTTP/1.1 200'
+      interval: 30s
+      start_period: 5s
+      start_interval: 1s
+      timeout: 3s
+      retries: 3
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    stop_grace_period: 10s
+
+volumes:
+  anotau-data:
