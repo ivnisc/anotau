@@ -1,0 +1,9 @@
+# Pasos que cargo-dist ejecuta antes de compilar cada binario del cliente (github-build-setup).
+# Los instaladores publicados apuntan a la VM y confían en su CA privada sin configurar nada;
+# ANOTAU_SERVER_URL y ANOTAU_CA_CERT los reemplazan al ejecutar. La CA es solo el certificado
+# público: su clave nunca está en el repositorio.
+- name: Fijar la instancia de Anotau
+  shell: bash
+  run: |
+    echo "ANOTAU_DEFAULT_SERVER_URL=https://10.33.196.179:8443/" >> "$GITHUB_ENV"
+    echo "ANOTAU_DEFAULT_CA_CERT=$GITHUB_WORKSPACE/assets/ca/anotau-vm.crt" >> "$GITHUB_ENV"

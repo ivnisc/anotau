@@ -1,0 +1,23 @@
+# cargo-dist: binario e instaladores solo del cliente; el servidor se instala como servicio de
+# systemd en la VM (server/deploy/).
+[workspace]
+members = ["cargo:."]
+
+[dist]
+cargo-dist-version = "0.34.0"
+# GitHub Actions compila y publica un Release al subir una etiqueta vX.Y.Z.
+ci = "github"
+installers = ["shell", "powershell"]
+# Linux estático con musl: funciona en cualquier distribución sin glibc específica.
+targets = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "aarch64-unknown-linux-musl",
+    "x86_64-unknown-linux-musl",
+    "x86_64-pc-windows-msvc",
+]
+# quien instala no tiene Rust: no usar ~/.cargo/bin.
+install-path = ["$ANOTAU_INSTALL_DIR/", "~/.anotau/bin"]
+install-updater = false
+# antes de compilar, el CI fija la URL y la CA de la VM que el cliente lleva incrustadas.
+github-build-setup = "../build-setup.yml"
